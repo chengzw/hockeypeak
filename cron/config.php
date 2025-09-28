@@ -320,22 +320,6 @@
         )
     );
 
-    // $game_scores_config = array (
-    //     'is_json' => true,
-    //     "list_keys" => array(
-    //         'gameData',
-    //         ),
-    //     "properties" => array(
-    //         "status" => "status",
-    //         // "liveData" => "liveData",
-    //         "teams" => "teams"
-    //         ),
-    //     'content_pattern' => array(
-    //         "base_pattern" => '`a',"result_pattern" => '`a',
-    //         ),
-    // );
-    
-
     $geme_state_config = array(
         // "" => 0,
         "Final" => 1,
