@@ -4,8 +4,6 @@
     $nhl_host = "https://www.nhl.com";
     $nhl_api_host = "https://statsapi.web.nhl.com";
 
-    $download_image_path = "/home/services/www/hockeypeak.com/images";
-
     // 场上位置
     $position_config = array(
         // "" => 0, // 未知
@@ -255,14 +253,14 @@
         ),
     );
 
-    // 抓取日期比赛列表配置
+    // 抓取比赛配置
     $scores_config = array (
         // 'url' => "https://www.nhl.com/scores/[date]",
         // 'url' => "https://statsapi.web.nhl.com/api/v1/schedule?startDate=[date]&endDate=[date]&hydrate=team(leaders(categories=[points,goals,assists],gameTypes=[R])),linescore,broadcasts(all),tickets,game(content(media(epg),highlights(scoreboard)),seriesSummary),radioBroadcasts,metadata,decisions,scoringplays,seriesSummary(series)",
         'url' => $nhl_api_host."/api/v1/schedule?startDate=[date]&endDate=[date]&hydrate=game(content(media(epg))),scoringplays,linescore",
         // 'start_data' => "2019-10-01", // 包含本日期
-        'start_data' => "2020-08-10", // 包含本日期
-        'end_data' => "2021-10-01", // 不包含本日期
+        'start_data' => "2019-12-15", // 包含本日期
+        'end_data' => "2020-10-01", // 不包含本日期
         'config' => array(
             'is_json' => true,
             "list_keys" => array(
@@ -322,30 +320,10 @@
         )
     );
 
-    // $game_scores_config = array (
-    //     'is_json' => true,
-    //     "list_keys" => array(
-    //         'gameData',
-    //         ),
-    //     "properties" => array(
-    //         "status" => "status",
-    //         // "liveData" => "liveData",
-    //         "teams" => "teams"
-    //         ),
-    //     'content_pattern' => array(
-    //         "base_pattern" => '`a',"result_pattern" => '`a',
-    //         ),
-    // );
-    
-
     $geme_state_config = array(
-        "Scheduled (Time TBD)" => 0,
-        "Scheduled" => 0, // 1
-        "Pre-Game" => 0, //2
-        "Final" => 1, // 7
-        "Game Over" => 1,
-        "In Progress" => 2, // 3
-        "In Progress - Critical" => 2,
+        // "" => 0,
+        "Final" => 1,
+        // "" => 2,
         "Postponed" => 3,
     );
 ?>

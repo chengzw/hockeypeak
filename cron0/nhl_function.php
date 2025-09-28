@@ -78,6 +78,7 @@
         $result = array();
         
         $result['playtime'] = GetPatternSubString1("`aT`bZ", "`a `b", $scores['gameDate']);
+        $result['playtime'] = date('Y-m-d H:i:s', strtotime($result["playtime"] . ' +8 hour'));
         $result['gamecenter'] = array_key_exists("gamecenter", $scores)?$nhl_api_host.$scores['gamecenter']:"";
         $result['state'] = (array_key_exists("status", $scores) && array_key_exists($scores["status"]['detailedState'], $geme_state_config))?$geme_state_config[$scores["status"]['detailedState']]:9;
         $result['gamePk'] = array_key_exists("gamePk", $scores)?$scores['gamePk']:0;
@@ -198,12 +199,9 @@
                 if (!array_key_exists("team_id", $player) && array_key_exists("team", $player)) {
                     $player["team_id"] = $Nhl->get_team_id_by_name($player["team"]);
                 }
-
-                download_nhl_image($player["avatar"]);
-                download_nhl_image($player["cover"]);
                 
                 $NhlPlayer = new NhlPlayer($player);
-                // echo " nhl_player_id:" . $NhlPlayer->nhl_player_id . " ";
+                echo " nhl_player_id:" . $NhlPlayer->nhl_player_id . " ";
                 if ($NhlPlayer->team_id > 0) {
                     $Nhl->get_player_id($NhlPlayer);    
                 }
@@ -211,18 +209,14 @@
                 if (array_key_exists("news", $player) && count($player['news'])>0 && $NhlPlayer->id > 0) {
                     $news_count = count($player['news']);
                     echo " news total:" . $news_count . "... ";
-                    $add_num = 0;
                     foreach ($player['news'] as $news_index => $value) {
                         // echo "\n    get [" . ($news_index+1) . "/" . $news_count . "] news start date(" . date("H:i:s") . ")... ";
                         $video_id = get_video_id($value);
                         if ($video_id > 0) {
-                            if ($Nhl->video_to_player($video_id, $NhlPlayer->id) > 0) {
-                                $add_num++;
-                            }
+                            $Nhl->video_to_player($video_id, $NhlPlayer->id);
                         }
                         // echo "end date(" . date("H:i:s") . ")";
                     }
-                    echo " add video:" . $add_num . "... ";
                 }
                 else if ($NhlPlayer->id == 0) {
                     echo "\n       error:get NhlTeam->id is 0    ";
@@ -240,35 +234,6 @@
         return $player;
     }
 
-    function update_day_games($day_date, &$games, &$data_is_null_num) {
-        global $scores_config;
-
-        $url = str_replace("[date]", $day_date, $scores_config['url']);
-        echo "\nget [".$day_date."] scores start time(" . date("H:i:s") . ")... ";
-
-        // 抓取一天比赛
-        $content = file_get_contents($url, false);
-        if (strlen($content) > 1000) {
-            $data_is_null_num = 0;
-            $game_list = getResultByConfig($url, $scores_config['config'], $content);
-            $game_count = count($game_list);
-            echo " game total:" . $game_count . "... ";
-            foreach ($game_list as $game_index => $scores) {
-                $game = get_game_by_score($scores);
-                $NhlGame = handle_nhl_game($game);
-
-                if (array_key_exists($NhlGame->id, $games)) {
-                    echo "\n update game id:" . $NhlGame->id . " host:" . $game['host']['name'] . " guest:" . $game['guest']['name'] . "  playtime:" . $NhlGame->playtime . "... ";
-                    $games[$NhlGame->id]["is_update"] = true;
-                }
-            }
-        }
-        else {
-            $data_is_null_num++;
-        }
-
-        echo "end time(" . date("H:i:s") . ")";
-    }
 
     function handle_nhl_game($game){
         global $Nhl;
@@ -278,7 +243,6 @@
         if ($game['host_id'] > 0 && $game['guest_id'] > 0) {
             $NhlGame = new NhlGame($game);
             $Nhl->get_game_id($NhlGame);
-
             if ($NhlGame->id > 0) {
                 $game['host']['team_id'] = $game['host_id'];
                 $game['guest']['team_id'] = $game['guest_id'];
@@ -290,7 +254,7 @@
                 $Nhl->add_teamgames($NhlTeamgames);
                 
                 if (array_key_exists("recap", $game)) {
-                    echo "\n        get game_id:".$NhlGame->id." recap start date(" . date("H:i:s") . ")... ";
+                    echo "\n        get recap start date(" . date("H:i:s") . ")... ";
                     $video_id = get_video_id($game["recap"]);
                     if ($video_id > 0) {
                         $Nhl->video_to_recap($video_id, $NhlGame->id);
@@ -298,7 +262,7 @@
                     echo "end date(" . date("H:i:s") . ")";
                 }
                 if (array_key_exists("condensed", $game)) {
-                    echo "\n        get game_id:".$NhlGame->id." condensed start date(" . date("H:i:s") . ")... ";
+                    echo "\n        get condensed start date(" . date("H:i:s") . ")... ";
                     $video_id = get_video_id($game["condensed"]);
                     if ($video_id > 0) {
                         $Nhl->video_to_condensed($video_id, $NhlGame->id);
@@ -318,10 +282,6 @@
                     }
                 }
             }
-            return $NhlGame;
-        }
-        else {
-            return false;
         }
     }
 
@@ -413,7 +373,7 @@
                 $game['playtime'] = GetPatternSubString1("`aT`bZ", "`a `b", $got_array['gameData']['datetime']['dateTime']);
                 $game['state'] = (array_key_exists("status", $got_array['gameData']) && array_key_exists($got_array['gameData']["status"]['detailedState'], $geme_state_config))?$geme_state_config[$got_array['gameData']["status"]['detailedState']]:9;
                 if ($game['state'] == 9) {
-                    $str = "get_game_by_url: The state obtained is unknown! date:".date("Y-m-d H:i:s")." gamePk:".$game['gamePk']." state:".(array_key_exists("status", $got_array['gameData'])?$got_array['gameData']["status"]['detailedState']:"unknown!!!");
+                    $str = "get_game_by_score: The state obtained is unknown! date:".date("Y-m-d H:i:s")." gamePk:".$game['gamePk']." state:".(array_key_exists("status", $got_array['gameData'])?$got_array['gameData']["status"]['detailedState']:"unknown!!!");
                     echo "\n     ".$str."\n";
                     report_error($str,584);
                 }
@@ -485,50 +445,4 @@
         return $game;
     }
     
-    // 根据链接获取保存图片位置
-    function get_image_path($pic_url) {
-        global $download_image_path;
-        $result = GetPatternSubString1("/images/photos/`a/`b/`c^^^", $download_image_path."/photos/`a/768x432/`c", $pic_url . "^^^");
-        $result = $result == ""?GetPatternSubString1("/images/`a^^^", $download_image_path."/`a", $pic_url . "^^^"):$result;
-        
-        return $result;
-    }
-    
-    // 下载图片到地址
-    function download_image_to_file($pic_url, $pic_file) {
-        $pic_path = dirname($pic_file);
-
-        if (!file_exists($pic_path)) {
-            mkdir($pic_path, 0777, true);
-            @chmod($pic_path, 0777);
-        }
-        ob_start(); //打开输出
-        readfile($pic_url); //输出图片文件
-        $img = ob_get_contents(); //得到浏览器输出
-        ob_end_clean(); //清除输出并关闭
-        $result = file_put_contents($pic_file, $img);
-        
-        return $result !== false;
-    }
-
-    // 下载图片
-    function download_nhl_image($pic_url){
-        $result = false;
-        $pic_file = get_image_path($pic_url);
-
-        if (file_exists($pic_file)) {
-            // echo "file:$pic_file  exists\n";
-            $result = true;
-        }
-        else {
-            // echo "file does not exists! download path:$pic_file\n";
-            $result = download_image_to_file($pic_url, $pic_file);
-            if (!$result) {
-                $str = "download_nhl_image: Image download failed! date:".date("Y-m-d H:i:s")." pic_url:".$pic_url." pic_file:".$pic_file;
-                echo "\n     ".$str."\n";
-                report_error($str,584);
-            }
-        }
-        return $result;
-    }
 ?>
