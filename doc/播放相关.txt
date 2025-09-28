@@ -1,0 +1,11 @@
+1. 播放的时候，向以下地址请求视频信息：
+/interface.php?a=get_video_info&id=
+得到url（NHL.com的网页地址）、playurl（用于iframe的网址），例如：
+url: https://www.nhl.com/blackhawks/video/recap-blackhawks-at-kings-4-18-24-6351215817112
+playurl: https://players.brightcove.net/6415718365001/default_default/index.html?videoId=6351215817112&autoplay=false&muted=false&applicationId=blackhawks&adConfigId=60fb89f7-e7e0-43c0-bebb-82509eea461a
+
+2. 在src\components\play\index.vue里，根据获取到的信息创建播放器：
+a、https://vip.czplayer.com/hockey/play.php?format=nhl&url=[video.url]     （这种需要解析出mp3）
+b、https://vip.czplayer.com/hockey/play.php?format=direct&url=[video.playurl]  （这种有广告，但能直接从nhl的网页里获取到）
+
+
