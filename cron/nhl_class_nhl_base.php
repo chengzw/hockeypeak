@@ -39,6 +39,7 @@
 			echo "process $date...\n";
 			$func = "update_date_$type";
 			$nextDate = $this->$func($date);
+			sleep(5);
 		}
 	}
     

@@ -12,10 +12,12 @@
     	$teams[$team["nhl_team_id"]] = $team;
     }
     echo "\n******************** start time(" . date("Y-m-d H:i:s") . ") *************************\n";
-    $start_date = "2024-02-08";
     $start_date = date("Y-m-d", strtotime("-2 day"));
-    $end_date = -1;
     $end_date = date("Y-m-d", strtotime("+3 day"));
+    // 测试的时候使用下面的定义
+    $start_date = "2025-02-22";
+    // $end_date = -1;
+    $end_date = "2025-05-31";
     $NhlScore = new NhlScore($start_date, $end_date);
     $NhlScore->update_score();
 

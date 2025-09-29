@@ -12,10 +12,10 @@
     	$teams[$team["nhl_team_id"]] = $team;
     }
     echo "\n******************** start time(" . date("Y-m-d H:i:s") . ") *************************\n";
-    $start_date = "2025-04-18";
-    $end_date = "2025-08-31";
+    $start_date = "2025-09-01";
+    // $end_date = "2025-08-31";
     // $start_date = date('Y-m-d');
-    // $end_date = -1;
+    $end_date = -1;
     $NhlSchedule = new NhlSchedule($start_date, $end_date);
     $NhlSchedule->update_schedule();
 
