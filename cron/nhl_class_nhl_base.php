@@ -44,12 +44,14 @@
 	}
     
     protected function get_games($date, &$nextDate) {
+		global $debug;
+
 		$url = sprintf("https://api-web.nhle.com/v1/score/%s", $date);
 		echo "get games for $date..., url: $url\n";
 		// print_r(file_get_contents($url));
     	// JsonCatcher($url, $isUtf8, &$content, $content_pattern, $outputUtf8=false, $debug=false)
     	$content = "";
-    	$debug = false;
+    	// $debug = false;
     	$catcher = new JsonCatcher($url, true, $content, null, true, $debug);
     	$params = array("nextDate" => new JsonPattern(array("nextDate")));
     	$result = $catcher->GetProperties($params);
@@ -85,6 +87,7 @@
     		$game["guest_scores_ot"] = 0;
     		$game["guest_scores_so"] = 0;
     		if (!array_key_exists("goals", $game) || empty($game["goals"])) {
+				echo "no goals for game: " . $game["gamePk"] . "\n";
     			continue;
     		}
     		foreach ($game["goals"] as $goal) {

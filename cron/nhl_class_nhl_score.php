@@ -8,9 +8,17 @@
 			parent::__construct($start_date, $end_date);
     }
 
-		public function update_score() {
-			$this->process_by_date("score");
+	public function update_score() {
+		$this->process_by_date("score");
+	}
+	public function update_missing_score($dates) {
+		global $debug;
+
+		$debug = true;
+		foreach ($dates as $date) {
+			$this->update_date_score($date);
 		}
+	}
 		   
     public function update_gamecenter_recap() {
 			$this->process_by_date("recap");
@@ -21,8 +29,14 @@
     }
     
     protected function update_date_score($date) {
+		global $debug;
+
     	$nextDate = "";
     	$games = $this->get_games($date, $nextDate);
+		if ($debug) {
+			echo "update_date_score $date games count: " . count($games) . "\n";
+			print_r($games);
+		}
     	$stop = false;
     	foreach ($games as $game) {
     		$sql = "select id from games where gamePk = " . $game["gamePk"];
